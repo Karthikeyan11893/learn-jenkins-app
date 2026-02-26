@@ -1,5 +1,5 @@
 pipeline {
-    agenet any
+    agent any
 
     stages {
         stage("Hello") {
