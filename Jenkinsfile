@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        /*
+
         stage('Build') {
             agent {
                 docker {
@@ -12,16 +12,11 @@ pipeline {
             }
             steps {
                 sh '''
-                    ls -la
-                    node --version
-                    npm --version
                     npm ci
                     npm run build
-                    ls -la
                 '''
             }
         }
-        */
 
         stage('Test') {
             agent {
@@ -30,10 +25,9 @@ pipeline {
                     reuseNode true
                 }
             }
-
             steps {
                 sh '''
-                    #test -f build/index.html
+                    npm ci
                     npm test
                 '''
             }
@@ -46,13 +40,15 @@ pipeline {
                     reuseNode true
                 }
             }
-
             steps {
                 sh '''
+                    npm ci
                     npm install serve
-                    node_modules/.bin/serve -s build &
+                    npx serve -s build -l 3000 &
+                    SERVER_PID=$!
                     sleep 10
                     npx playwright test --reporter=html
+                    kill $SERVER_PID
                 '''
             }
         }
@@ -61,7 +57,13 @@ pipeline {
     post {
         always {
             junit 'jest-results/junit.xml'
-            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            publishHTML([
+                allowMissing: true,
+                keepAll: false,
+                reportDir: 'playwright-report',
+                reportFiles: 'index.html',
+                reportName: 'Playwright HTML Report'
+            ])
         }
     }
 }
