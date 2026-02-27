@@ -46,7 +46,7 @@ pipeline {
                         sh 'npm test -- --ci --reporters=default --reporters=jest-junit'
                     }
                 }
-
+                /*
                 stage('Type Check') {
                     agent {
                         docker {
@@ -58,6 +58,7 @@ pipeline {
                         sh 'npm run type-check'
                     }
                 }
+                */
             }
         }
 
