@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Install') {
             agent {
                 docker {
@@ -14,14 +15,14 @@ pipeline {
                     reuseNode true
                 }
             }
-
             steps {
                 sh 'npm ci'
             }
         }
 
-        stage('Quality Check') {
+        stage('Quality Checks') {
             parallel {
+
                 stage('Lint') {
                     agent {
                         docker {
@@ -29,29 +30,30 @@ pipeline {
                             reuseNode true
                         }
                     }
-
                     steps {
                         sh 'npm run lint'
                     }
                 }
 
                 stage('Unit Tests') {
-                    docker {
-                        image "node:${NODE_VERSION}"
-                        reuseNode true
+                    agent {
+                        docker {
+                            image "node:${NODE_VERSION}"
+                            reuseNode true
+                        }
                     }
-
                     steps {
                         sh 'npm test -- --ci --reporters=default --reporters=jest-junit'
                     }
                 }
 
                 stage('Type Check') {
-                    docker {
-                        image "node:${NODE_VERSION}"
-                        reuseNode true
+                    agent {
+                        docker {
+                            image "node:${NODE_VERSION}"
+                            reuseNode true
+                        }
                     }
-
                     steps {
                         sh 'npm run type-check'
                     }
@@ -114,7 +116,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             junit 'jest-results/junit.xml'
